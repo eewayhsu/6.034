@@ -1,0 +1,22 @@
+<html>
+<head>
+<title>6.034 Automated Tester</title>
+</head>
+<body background="grey">
+<h1>6.034 Automated Tester</h1>
+<h2>Welcome   
+	<a href="logout">(Not you?)</a> </h2>
+
+
+<ul>
+<li>Download your <a href="key.py">key.py</a> file</li>
+<li>View your <a href="view_stats/">grades</a> so far</li>
+</ul>
+
+<!-- <h2> ***Please fill out the
+<a href="https://sixweb.mit.edu/student/evaluate/6.034-f2010">HKN Survey</a>
+ if you haven't already.
+</h2>
+-->
+</body>
+</html>
