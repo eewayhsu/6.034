@@ -196,14 +196,19 @@ def better_evaluate(board):
 
         score = 0
                 
-        player= board.get_current_player_id()
-        chain=board.longest_chain(player)
-    
-        if chain == 4:
-            score = 600
-        elif chain == 3:
-            score = 200
-        elif chain == 2:
+        playerChain = board.longest_chain(board.get_current_player_id())
+        opponentChain = board.longest_chain(board.get_other_player_id())
+
+        diff = playerChain - opponentChain
+        value = playerChain + diff
+
+        # 4 + 1, 3 + 2
+        if value >= 5:
+            score = 700
+            
+        elif value >= 4:
+            score = 300
+        elif value >= 3:
             score = 50
         
         # Prefer having your pieces in the center of the board.
