@@ -1,6 +1,6 @@
 # 6.034 Fall 2010 Lab 3: Games
-# Name: <Your Name>
-# Email: <Your Email>
+# Name: <Eeway Hsu>
+# Email: <eewayhsu@mit.edu>
 
 from util import INFINITY
 
@@ -56,8 +56,28 @@ def focused_evaluate(board):
     that board is for the current player.
     A return value >= 1000 means that the current player has won;
     a return value <= -1000 means that the current player has lost
-    """    
-    raise NotImplementedError
+    """
+    player = board.longest_chain(board.get_current_player_id())
+    opponent = board.longest_chain(board.get_other_player_id())
+
+    if player == 4:
+        return 1000
+
+    elif opponent == 4:
+        return -1000
+
+    else:
+        score = player * 10
+        # Prefer having your pieces in the center of the board.
+        for row in range(6):
+            for col in range(7):
+                if board.get_cell(row, col) == board.get_current_player_id():
+                    score -= abs(3-col)
+                elif board.get_cell(row, col) == board.get_other_player_id():
+                    score += abs(3-col)
+
+    return score
+    
 
 
 ## Create a "player" function that uses the focused_evaluate function
@@ -73,6 +93,34 @@ quick_to_win_player = lambda board: minimax(board, depth=4,
 ## counting the number of static evaluations you make.
 ##
 ## You can use minimax() in basicplayer.py as an example.
+
+def alpha_beta_find_board_value(board, depth, eval_fn,
+                                get_next_moves_fn=get_all_next_moves,
+                                is_terminal_fn=is_terminal):
+
+    if is_terminal_fn(depth, board) or depth == 0:
+        return eval_fn(board)
+    
+    else:
+        nextMoves = get_next_moves_fn(board)
+
+        #Move is the i in which we are placing a new coin
+        for move, childBoard in nextMoves:
+
+            childBoard.alpha = -board.beta
+            childBoard.beta = -board.alpha
+
+            val = -1 * alpha_beta_find_board_value(childBoard, depth -1,
+                                               eval_fn, get_next_moves_fn,
+                                               is_terminal_fn)
+
+            board.alpha = max(board.alpha, val)
+            if board.alpha >= board.beta:
+                return board.alpha
+
+        return board.alpha
+        
+
 def alpha_beta_search(board, depth,
                       eval_fn,
                       # NOTE: You should use get_next_moves_fn when generating
@@ -82,7 +130,23 @@ def alpha_beta_search(board, depth,
                       # for connect_four.
                       get_next_moves_fn=get_all_next_moves,
 		      is_terminal_fn=is_terminal):
-    raise NotImplementedError
+
+    board.alpha = NEG_INFINITY  #Max
+    board.beta = INFINITY       #Min
+    best_val = None
+
+    nextMoves = get_next_moves_fn(board)
+
+    for move, childBoard in nextMoves:
+        childBoard.alpha = -board.beta
+        childBoard.beta = -board.alpha
+        val = -1 * alpha_beta_find_board_value(childBoard, depth - 1,
+                                               eval_fn, get_next_moves_fn,
+                                               is_terminal_fn)
+        if best_val == None or val > best_val[0]:
+            best_val = (val, move, childBoard)
+
+    return best_val[1]
 
 ## Now you should be able to search twice as deep in the same amount of time.
 ## (Of course, this alpha-beta-player won't work until you've defined
@@ -104,24 +168,106 @@ ab_iterative_player = lambda board: \
 ## simple-evaluate (or focused-evaluate) while searching to the
 ## same depth.
 
+
 def better_evaluate(board):
-    raise NotImplementedError
+
+    tokens = board.num_tokens_on_board()
+
+    
+    if board.is_game_over():
+        # If the game has been won, we know that it must have been
+        # won or ended by the previous move.
+        # The previous move was made by our opponent.
+        # Therefore, we can't have won, so return -1000.
+        # (note that this causes a tie to be treated like a loss)
+        score = -1000
+    
+    else:
+
+        """for chain in board.chain_cells(board.get_current_player_id()):
+            if len(chain) > 1:
+                score += len(chain)
+
+        for chain in board.chain_cells(board.get_other_player_id()):
+            if len(chain) > 1:
+                score -= len(chain)
+
+        score = score * (42 - tokens) * board.longest_chain(board.get_current_player_id())"""
+
+        score = 0
+                
+        player= board.get_current_player_id()
+        chain=board.longest_chain(player)
+    
+        if chain == 4:
+            score = 600
+        elif chain == 3:
+            score = 200
+        elif chain == 2:
+            score = 50
+        
+        # Prefer having your pieces in the center of the board.
+        for row in range(6):
+            for col in range(7):
+                if board.get_cell(row, col) == board.get_current_player_id():
+                    score -= (abs(3-col) + abs(3-row)) ** 3
+                elif board.get_cell(row, col) == board.get_other_player_id():
+                    score += (abs(3-col) + abs(3-row)) ** 3
+
+    return score 
+
+
+
+    """playerID = board.get_current_player_id()
+    opponentID = board.get_other_player_id()
+
+    player = board.longest_chain(playerID)
+    opponent = board.longest_chain(opponentID)
+
+    playerChain = board.chain_cells(playerID)
+    opponentChain = board.chain_cells(opponentID)
+    
+    tokens = board.num_tokens_on_board()
+
+    score = 0
+
+    if player == 4:
+        return 1000
+
+    if opponent == 4:
+        return -1000
+
+    if player == 3:
+        score = 400
+        
+    elif player == 2:
+        score = 10
+        
+    for row in range(6):
+        for col in range(7):
+            if board.get_cell(row, col) == opponentID:
+                score -= (abs(3 - col) + abs(3 - row)) * (42 - tokens)
+            elif board.get_cell(row, col) == playerID:
+                score += (abs(3 - col) + abs(3 - row)) * (42 - tokens)
+                
+    return score"""
+    
 
 # Comment this line after you've fully implemented better_evaluate
-better_evaluate = memoize(basic_evaluate)
+#better_evaluate = memoize(basic_evaluate)
 
 # Uncomment this line to make your better_evaluate run faster.
-# better_evaluate = memoize(better_evaluate)
+better_evaluate = memoize(better_evaluate)
 
 # For debugging: Change this if-guard to True, to unit-test
 # your better_evaluate function.
-if False:
+if True:
     board_tuples = (( 0,0,0,0,0,0,0 ),
                     ( 0,0,0,0,0,0,0 ),
                     ( 0,0,0,0,0,0,0 ),
-                    ( 0,2,2,1,1,2,0 ),
+                    ( 0,2,0,0,0,2,0 ),
                     ( 0,2,1,2,1,2,0 ),
-                    ( 2,1,2,1,1,1,0 ),
+                    ( 0,1,2,1,1,1,0 ),
                     )
     test_board_1 = ConnectFourBoard(board_array = board_tuples,
                                     current_player = 1)
@@ -169,12 +315,12 @@ def run_test_tree_search(search, board, depth):
 ## Do you want us to use your code in a tournament against other students? See
 ## the description in the problem set. The tournament is completely optional
 ## and has no effect on your grade.
-COMPETE = (None)
+COMPETE = (True)
 
 ## The standard survey questions.
-HOW_MANY_HOURS_THIS_PSET_TOOK = ""
-WHAT_I_FOUND_INTERESTING = ""
-WHAT_I_FOUND_BORING = ""
-NAME = ""
-EMAIL = ""
+HOW_MANY_HOURS_THIS_PSET_TOOK = "6"
+WHAT_I_FOUND_INTERESTING = "Implementing a-b and trying to think of a better evaluate.  SUPER HARD.  I can't beat the basic_player when I try to be a human player anyways :( "
+WHAT_I_FOUND_BORING = "Waiting for tests to run"
+NAME = "Eeway Hsu"
+EMAIL = "eewayhsu@mit.edu"
 

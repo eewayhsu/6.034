@@ -1,6 +1,5 @@
-
-#Login information for the 6.034 Automated Tester
+# Login information for the 6.034 Automated Tester
 
 USERNAME="eewayhsu_MIT_EDU"
-PASSWORD="QzxnP8aLqQGygM6mTs69"
+PASSWORD="3tNabJj7PLbCUgYj6VZ5"
 XMLRPC_URL="https://ai6034.mit.edu/labs/xmlrpc/"
